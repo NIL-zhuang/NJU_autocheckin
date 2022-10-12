@@ -2,7 +2,6 @@
 import datetime
 import os
 import random
-import sys
 from hashlib import md5
 from time import sleep
 
@@ -10,23 +9,19 @@ import requests
 
 from message import pushplus_message
 
-# %%
-# rand time
-print('Triggered at %s' % (datetime.datetime.now()))
+SLEEP_TIME = 60  # 睡眠的时间范围，单位：秒
 
-rand_time = random.random() * 60
-print(f'Scheduled at {datetime.datetime.now() + datetime.timedelta(seconds=rand_time)}')
-if len(sys.argv) <= 2:
-    sleep(rand_time)
+# 打卡前进行一次随机时长的睡眠
+print(f"Triggered at {datetime.datetime.now()}")
+rand_time = random.random() * SLEEP_TIME
+print(f"Scheduled at {datetime.datetime.now() + datetime.timedelta(seconds=rand_time)}")
+sleep(rand_time)
+print(f"Started at {datetime.datetime.now()}")
 
-print(f'Started at {datetime.datetime.now()}')
+CASTGC = os.environ['CASTGC']   # https://authserver.nju.edu.cn/ storage/COOKIES的CASTGC
+PUSHPLUS_TOKEN = os.environ['PUSHPLUS_TOKEN']   # 你所设置的pushplus的token
 
-# %% const
-CASTGC = os.environ['CASTGC']
-PUSHPLUS_TOKEN = os.environ['PUSHPLUS_TOKEN']
 session = requests.Session()
-
-# %% list
 response = session.get(
     url=r'http://ehallapp.nju.edu.cn/xgfw/sys/yqfxmrjkdkappnju/apply/getApplyInfoList.do',
     headers={
@@ -36,19 +31,19 @@ response = session.get(
     cookies={'CASTGC': CASTGC}
 )
 
+# 获取上一次打卡的信息
 try:
     content = response.json()
 except ValueError:
     content = {}
 print(f"List: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}")
-
 if not (response.status_code == 200 and content.get('code') == '0'):
     exit(0)
 
 data = next(x for x in content['data'] if x.get('TJSJ') != '')
 wid = content['data'][0]['WID']
 
-# %% get MD5
+# get MD5
 response = session.get(
     url=r'http://ehallapp.nju.edu.cn/xgfw//sys/yqfxmrjkdkappnju/apply/getMd5Value.do',
     headers={
@@ -62,12 +57,7 @@ try:
     content = response.text
 except ValueError:
     content = {}
-if response.status_code == 200 and len(content) > 0:
-    print('MD5: %d, %s' % (response.status_code, response.reason or 'No messgage available'))
-else:
-    print('MD5: %d, %s' % (response.status_code, response.reason or 'No messgage available'))
-    exit(1)
-
+print(f"MD5: {response.status_code}, {response.reason or 'No messgage available}'}")
 md5_value = content
 
 
@@ -101,7 +91,9 @@ try:
 except ValueError:
     content = {}
 
-msg = f"Apply: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}"
+msg = f"Apply: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}, {data_apply}"
 if response.status_code == 200 and content.get('code') == '0':
     print('Finished at %s' % (datetime.datetime.now()))
-    pushplus_message(PUSHPLUS_TOKEN, msg)
+    print(msg)
+    if PUSHPLUS_TOKEN:
+        pushplus_message(PUSHPLUS_TOKEN, msg)
