@@ -38,6 +38,8 @@ except ValueError:
     content = {}
 print(f"List: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}")
 if not (response.status_code == 200 and content.get('code') == '0'):
+    if PUSHPLUS_TOKEN:
+        pushplus_message(PUSHPLUS_TOKEN, f"获取上一次打卡信息失败，状态码：{response.status_code}，原因：{response.reason}")
     exit(0)
 
 data = next(x for x in content['data'] if x.get('TJSJ') != '')
@@ -70,7 +72,7 @@ data_apply = {
     'JZRJRSKMYS': data['JZRJRSKMYS'],
     'SFZJLN': data['SFZJLN'],
     'WID': wid,
-    'ZJHSJCSJ': (datetime.datetime.now() - random.randint(0, 1) * datetime.timedelta(days=1)).strftime(r'%Y-%m-%d') + ' %02d' % (random.randint(0, 16))
+    'ZJHSJCSJ': (datetime.datetime.now() - random.randint(0, 1) * datetime.timedelta(days=1)).strftime(r'%Y-%m-%d') + ' %02d' % (random.randint(8, 16))
 }
 data_apply['sign'] = md5('|'.join(list(data_apply.values()) + [md5_value]).encode("utf-8")).hexdigest()
 
