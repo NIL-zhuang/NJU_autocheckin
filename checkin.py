@@ -14,12 +14,12 @@ from message import pushplus_message
 # rand time
 print('Triggered at %s' % (datetime.datetime.now()))
 
-rand_time = random.random() * 3600
-print('Scheduled at %s' % (datetime.datetime.now() + datetime.timedelta(seconds=rand_time)))
+rand_time = random.random() * 60
+print(f'Scheduled at {datetime.datetime.now() + datetime.timedelta(seconds=rand_time)}')
 if len(sys.argv) <= 2:
     sleep(rand_time)
 
-print('Started at %s' % (datetime.datetime.now()))
+print(f'Started at {datetime.datetime.now()}')
 
 # %% const
 CASTGC = os.environ['CASTGC']
@@ -40,11 +40,10 @@ try:
     content = response.json()
 except ValueError:
     content = {}
-if response.status_code == 200 and content.get('code') == '0':
-    print('List: %d, %s, %s' % (response.status_code, response.reason, content.get('msg') or 'No messgage available'))
-else:
-    print('List: %d, %s, %s' % (response.status_code, response.reason, content.get('msg') or 'No messgage available'))
-    exit(1)
+print(f"List: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}")
+
+if not (response.status_code == 200 and content.get('code') == '0'):
+    exit(0)
 
 data = next(x for x in content['data'] if x.get('TJSJ') != '')
 wid = content['data'][0]['WID']
