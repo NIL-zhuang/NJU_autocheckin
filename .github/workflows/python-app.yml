@@ -5,27 +5,30 @@ name: NJU Unhealth Autocheckin
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
     - cron: 0 16 * * *
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.9"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Test with pytest
-      run: |
-        python checkin.py ${{ secrets.CASTGC }}$
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Checking in ...
+        run: |
+          python checkin.py
+        env:
+          CASTGC: ${{ secrets.CASTGC }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+      - uses: gautamkrishnar/keepalive-workflow@master

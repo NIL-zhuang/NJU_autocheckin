@@ -1,11 +1,14 @@
 # %%
 import datetime
+import os
 import random
 import sys
 from hashlib import md5
 from time import sleep
 
 import requests
+
+from message import pushplus_message
 
 # %%
 # rand time
@@ -19,7 +22,8 @@ if len(sys.argv) <= 2:
 print('Started at %s' % (datetime.datetime.now()))
 
 # %% const
-CASTGC = sys.argv[1]
+CASTGC = os.environ['CASTGC']
+PUSHPLUS_TOKEN = os.environ['PUSHPLUS_TOKEN']
 session = requests.Session()
 
 # %% list
@@ -97,12 +101,8 @@ try:
     content = response.json()
 except ValueError:
     content = {}
-if response.status_code == 200 and content.get('code') == '0':
-    print('Apply: %d, %s, %s' % (response.status_code, response.reason, content.get('msg') or 'No messgage available'))
-else:
-    print('Apply: %d, %s, %s' % (response.status_code, response.reason, content.get('msg') or 'No messgage available'))
-    exit(1)
-pass
 
-# %%
-print('Finished at %s' % (datetime.datetime.now()))
+msg = f"Apply: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}"
+if response.status_code == 200 and content.get('code') == '0':
+    print('Finished at %s' % (datetime.datetime.now()))
+    pushplus_message(PUSHPLUS_TOKEN, msg)
