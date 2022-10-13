@@ -9,7 +9,7 @@ import requests
 
 from message import pushplus_message
 
-SLEEP_TIME = 60  # 睡眠的时间范围，单位：秒
+SLEEP_TIME = 300  # 睡眠的时间范围，单位：秒
 
 # 打卡前进行一次随机时长的睡眠
 print(f"Triggered at {datetime.datetime.now()}")
@@ -39,7 +39,7 @@ except ValueError:
 print(f"List: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}")
 if not (response.status_code == 200 and content.get('code') == '0'):
     if PUSHPLUS_TOKEN:
-        pushplus_message(PUSHPLUS_TOKEN, f"获取上一次打卡信息失败，状态码：{response.status_code}，原因：{response.reason}")
+        pushplus_message(PUSHPLUS_TOKEN, f"获取上一次打卡信息失败，状态码：{response.status_code}，原因：{response.reason}", title=f"Fail NJU Health Checkin")
     exit(0)
 
 data = next(x for x in content['data'] if x.get('TJSJ') != '')
@@ -98,4 +98,4 @@ if response.status_code == 200 and content.get('code') == '0':
     print('Finished at %s' % (datetime.datetime.now()))
     print(msg)
     if PUSHPLUS_TOKEN:
-        pushplus_message(PUSHPLUS_TOKEN, msg)
+        pushplus_message(PUSHPLUS_TOKEN, msg, title=f"Success NJU Health Checkin")
