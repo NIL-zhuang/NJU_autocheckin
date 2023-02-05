@@ -9,7 +9,7 @@ import requests
 
 from message import pushplus_message
 
-SLEEP_TIME = 300  # 睡眠的时间范围，单位：秒
+SLEEP_TIME = 3  # 睡眠的时间范围，单位：秒
 USER_AGENT = "Mozilla/5.0 (Linux; Android 12; 22011211C Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/106.0.5249.126 Mobile Safari/537.36 okhttp/3.12.4 cpdaily/9.0.15 wisedu/9.0.15"  # 安卓客户端的user-agent
 REFER = r"http://ehallapp.nju.edu.cn/xgfw/sys/mrjkdkappnju/index.html"
 GET_APPLY_INFO_URL = r"http://ehallapp.nju.edu.cn/xgfw/sys/yqfxmrjkdkappnju/apply/getApplyInfoList.do"
@@ -69,7 +69,6 @@ print(f"MD5: {response.status_code}, {response.reason or 'No messgage available}
 md5_value = content
 
 # Apply for checkin
-hesuan_time = (datetime.datetime.now() - random.randint(0, 1) * datetime.timedelta(days=1)).strftime(r'%Y-%m-%d') + ' %02d' % (random.randint(8, 16))
 data_apply = {
     'CURR_LOCATION': data['CURR_LOCATION'],
     'IS_HAS_JKQK': data['IS_HAS_JKQK'],
@@ -78,7 +77,8 @@ data_apply = {
     'JZRJRSKMYS': data['JZRJRSKMYS'],
     'SFZJLN': data['SFZJLN'],
     'WID': wid,
-    'ZJHSJCSJ': hesuan_time,
+    'ZJHSJCSJ': datetime.datetime.now().strftime(r'%Y-%m-%d') + ' %02d' % ([2, 3, 4, 5, 14, 15, 16, 18][random.randint(0, 7)]),
+    'DQDXGZK': data['DQDXGZK'],
 }
 data_apply['sign'] = md5('|'.join(list(data_apply.values()) + [md5_value]).encode("utf-8")).hexdigest()
 print(data_apply)
@@ -95,12 +95,12 @@ except ValueError:
     content = {}
 
 # 反馈结果
+if not PUSHPLUS_TOKEN:
+    exit()
 msg = f"Apply: {response.status_code}, {response.reason}, {content.get('msg') or 'No messgage available'}, {data_apply}"
 if response.status_code == 200 and content.get('code') == '0':
     print('Finished at %s' % (datetime.datetime.now()))
     print(msg)
-    if PUSHPLUS_TOKEN:
-        pushplus_message(PUSHPLUS_TOKEN, msg, title=PUSHPLUS_SUCCESS)
+    pushplus_message(PUSHPLUS_TOKEN, msg, title=PUSHPLUS_SUCCESS)
 else:
-    if PUSHPLUS_TOKEN:
-        pushplus_message(PUSHPLUS_TOKEN, msg, title=PUSHPLUS_FAIL)
+    pushplus_message(PUSHPLUS_TOKEN, msg, title=PUSHPLUS_FAIL)
