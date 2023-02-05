@@ -9,7 +9,7 @@ import requests
 
 from message import pushplus_message
 
-SLEEP_TIME = 3  # 睡眠的时间范围，单位：秒
+SLEEP_TIME = 300  # 睡眠的时间范围，单位：秒
 USER_AGENT = "Mozilla/5.0 (Linux; Android 12; 22011211C Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/106.0.5249.126 Mobile Safari/537.36 okhttp/3.12.4 cpdaily/9.0.15 wisedu/9.0.15"  # 安卓客户端的user-agent
 REFER = r"http://ehallapp.nju.edu.cn/xgfw/sys/mrjkdkappnju/index.html"
 GET_APPLY_INFO_URL = r"http://ehallapp.nju.edu.cn/xgfw/sys/yqfxmrjkdkappnju/apply/getApplyInfoList.do"
